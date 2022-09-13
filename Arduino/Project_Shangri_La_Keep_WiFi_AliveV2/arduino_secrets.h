@@ -1,0 +1,4 @@
+#define SECRET_DATABASE_URL ""
+#define SECRET_DATABASE_SECRET ""
+#define SECRET_SSID ""
+#define SECRET_PASS ""

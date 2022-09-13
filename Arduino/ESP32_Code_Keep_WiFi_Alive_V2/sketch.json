@@ -1,0 +1,22 @@
+{
+  "cpu": {
+    "fqbn": "",
+    "name": "",
+    "type": ""
+  },
+  "secrets": [
+    {
+      "name": "SECRET_WIFI_SSID",
+      "value": ""
+    },
+    {
+      "name": "SECRET_WIFI_PASSWORD",
+      "value": ""
+    },
+    {
+      "name": "SECRET_DATABASE_URL",
+      "value": ""
+    }
+  ],
+  "included_libs": []
+}
