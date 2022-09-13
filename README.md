@@ -184,7 +184,8 @@ Let me name just a few of my failed efforts to paint an understanding of how har
 - [ChartView](https://github.com/AppPear/ChartView "SwiftUICharts")
 - [rc-switch](https://github.com/sui77/rc-switch)
 - [WiFiNINA](https://github.com/arduino-libraries/WiFiNINA "Arduino WiFININA")
-## Code
+- [firebase-ios-sdk](https://github.com/firebase/firebase-ios-sdk)
+- [swift-collections](https://github.com/apple/swift-collections)
 
 ***
 
