@@ -1,13 +1,13 @@
 # .gitignore file
 
-# Arduino folder
-Arduino/ESP32-RF-Transmitter/main/debug_custom.json
-Arduino/ESP32-RF-Transmitter/main/debug.cfg
-Arduino/ESP32-RF-Transmitter/main/esp32.svd
-Arduino/ESP32-RF-Transmitter/main/secrets.h
-Arduino/MKR-1010-Central-Hub/main/secrets.h
-Arduino/MKR-1010-Water-Quality-Monitor/main/config.h
-Arduino/Nano-33-IoT-Central-Hub/main/config.h
+# Microcontroller folders
+**/ESP32-RF-Transmitter/main/debug_custom.json
+**/ESP32-RF-Transmitter/main/debug.cfg
+**/ESP32-RF-Transmitter/main/esp32.svd
+**/ESP32-RF-Transmitter/main/secrets.h
+**/MKR-1010-Central-Hub/main/secrets.h
+**/MKR-1010-Water-Quality-Monitor/main/config.h
+**/Nano-33-IoT-Central-Hub/main/config.h
 
 # .vscode and .build folders
 **/.vscode/
