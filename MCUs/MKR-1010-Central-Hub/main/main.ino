@@ -34,7 +34,6 @@ TODO:
 #include "helpers.h"
 #include "version.h"
 #include "secrets.h"
-#include "config.h"
 #include "on_board_led.h"
 
 #include <ArduinoJson.h>

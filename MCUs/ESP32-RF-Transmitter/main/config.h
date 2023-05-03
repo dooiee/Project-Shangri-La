@@ -1,9 +1,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-// Define software version for future reference
-#define SOFTWARE_VERSION "2.0.1"
-
 ///// Below is all transmitted codes to control the underwater LEDs (Decimal and Binary).
 const int rfDecimalCodeBrightness = 334849;
 const int rfDecimalCodeSleepTimer = 334850;
