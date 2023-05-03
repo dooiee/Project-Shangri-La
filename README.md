@@ -169,23 +169,38 @@ Let me name just a few of my failed efforts to paint an understanding of how har
 
 ## Hardware/Software Used
 - [Firebase RTDB](https://firebase.google.com "Firebase Homepage")
-- [Arduino MKR WiFi 1010](https://docs.arduino.cc/static/fc77c3c3c77d69764ba7773df64c99db/ABX00023-datasheet.pdf "MKR WiFi 1010 Datasheet")
+- [Arduino MKR WiFi 1010s](https://docs.arduino.cc/hardware/mkr-wifi-1010)
+- [MKR ETH Shield](https://docs.arduino.cc/hardware/mkr-eth-shield)
 - [ESP-WROOM-32D](https://espressif-docs.readthedocs-hosted.com/projects/esp-idf/en/stable/hw-reference/get-started-devkitc.html "Espressif ESP32-DevKitC V4")
+- [Arduino Nano 33 IoT](https://docs.arduino.cc/hardware/nano-33-iot)
 - MB102 3.3V/5V Breadboard Power Supply
 - 433MHz RF Transmitter and Receiver Modules
-- Solenoid Valve
-- [Arduino IDE](https://www.arduino.cc "Arduino Homepage")
-- C/C++
-- [Swift](https://docs.swift.org/swift-book/)
+- [Data sensors](MCUs/MKR-1010-Water-Quality-Monitor/main/main.ino) (link to MKR-1010-Water-Quality-Monitor code containing product names and specifics)
+- [Solenoid Valve](https://www.amazon.com/gp/product/B07YTJYYML)
+- [4-Port Relay Module](https://www.amazon.com/4-channel-relay-module/s?k=4+channel+relay+module)
 
 ### Software Libraries Used
-- [Firebase-Arduino-WiFi101](https://github.com/mobizt/Firebase-Arduino-WiFi101)
-- [Firebase-ESP-Client](https://github.com/mobizt/Firebase-ESP-Client)
-- [ChartView](https://github.com/AppPear/ChartView "SwiftUICharts")
-- [rc-switch](https://github.com/sui77/rc-switch)
-- [WiFiNINA](https://github.com/arduino-libraries/WiFiNINA "Arduino WiFININA")
+#### Microcontrollers (coded with C/C++)
+- [Atlas Scientific Gravity Sensor Library](https://files.atlas-scientific.com/gravity-pH-ardunio-code.pdf) (modified)
+- [Adafruit_SleepyDog](https://github.com/adafruit/Adafruit_SleepyDog)
+- [ArduinoBLE](https://github.com/arduino-libraries/ArduinoBLE)
+- [LiquidCrystal_I2C](https://github.com/johnrickman/LiquidCrystal_I2C)
+- [FirebaseESP32](https://github.com/mobizt/Firebase-ESP32)
+- [OneWire](https://github.com/PaulStoffregen/OneWire)
+- [DallasTemperature](https://github.com/milesburton/Arduino-Temperature-Control-Library)
+- [NewPing](https://bitbucket.org/teckel12/arduino-new-ping/wiki/Home)
+- [RCSwitch](https://github.com/sui77/rc-switch)
+- [ArduinoJSON](https://github.com/bblanchon/ArduinoJson)
+- [EthernetLarge](https://github.com/OPEnSLab-OSU/EthernetLarge)
+- [SSLClient](https://github.com/OPEnSLab-OSU/SSLClient)
+- [RTCZero](https://github.com/arduino-libraries/RTCZero)
+- ~~[Firebase-Arduino-WiFi101](https://github.com/mobizt/Firebase-Arduino-WiFi101)~~ (No longer used)
+- ~~[WiFiNINA](https://github.com/arduino-libraries/WiFiNINA "Arduino WiFININA")~~ (^)
+
+#### iOS app (coded with Swift & SwiftUI/WidgetKit Frameworks)
 - [firebase-ios-sdk](https://github.com/firebase/firebase-ios-sdk)
 - [swift-collections](https://github.com/apple/swift-collections)
+- [ChartView](https://github.com/AppPear/ChartView "SwiftUICharts")
 
 ***
 
@@ -194,23 +209,25 @@ Let me name just a few of my failed efforts to paint an understanding of how har
     
     >(i.e. if it resets, how long does it typically take to get back online? Can I then improve that?)
     
-- [X] Code cleanup
+- [X] MCU Code cleanup
   - [X] Add more specific functions to better respond to the MCU situation 
   
     > (i.e. reconnect Wi-Fi if connection is lost rather than just reset for any problem)
     
-  - [X] Improve response time to a remote action such as changing the underwater light color by programming microcontrollers much like a state machine
+  - [X] ~~Improve response time to a remote action such as changing the underwater light color by programming microcontrollers much like a state machine~~ Rewrote ESP32 code to detect stream value changes faster to improve signal transmission and response time.
       
       > For instance, most times the action is taken within two seconds (because I have the MCU wait two seconds between each loop, but say I have it simply monitor a state and once that state is observed (like my phone displaying the remote control screen to change the lights), I could change the loop period that checks for a color signal to a fraction of a second time while I am interested in changing the color; thus improving controller response times by magnitudes.
   - [ ] Various small UI bug fixes
-      
+
+- [ ] iOS app code cleanup
 - [ ] Be able to push OTA software updates to microcontrollers rather than having to physically remove the units from the box to modify 
-- [X] Better protect depth sensor so that rain does not temporarily cause erroneous measurements 
+- [X] ~~Better protect depth sensor so that rain does not temporarily cause erroneous measurements~~ (bought a waterproof depth sensor finally) 
 
 ## Future Ideas & Developments
 - [ ] Autodose chemicals using peristaltic pumps
-- [X] Add more sensors to better monitor water quality (dissolved oxygen levels, KH, and a better pH sensor)
+- [X] Add more sensors to better monitor water quality (dissolved oxygen levels, KH, ~~and a better pH sensor~~)
 - [X] Install an underwater camera that streams realtime video to the application to monitor fish health and observe any abnormalities
+    - [ ] release updated App IP camera integration allowing viewing and control via ONVIF/SOAP protocols
 - [ ] Electrically rig automated feeder to be able to control and feed remotely
 
 ## Acknowledgements
