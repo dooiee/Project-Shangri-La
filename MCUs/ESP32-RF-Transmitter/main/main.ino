@@ -14,6 +14,7 @@ TODO:
         The database will also set a timestamp value to indicate when the change was made.
     5. Wi-Fi and Firebase connections will be re-established if they are lost.
 */
+#include "version.h"
 #include "secrets.h"
 #include "config.h"
 #include <WiFi.h>
@@ -59,7 +60,7 @@ void setup() {
   }
   Serial.println("\nSerial port connected.");
 
-  Serial.printf("Software version: v%s\n", SOFTWARE_VERSION);
+  Serial.printf("Software version: v%s\n", RELEASE_VERSION);
   Serial.printf("Firebase Client v%s\n\n", FIREBASE_CLIENT_VERSION);
 
   // Connect to WiFi network

@@ -22,6 +22,8 @@ TODO:
   - Reconnect to server if disconnected (i.e. perihperal MKR 1010 is turned off/not sending data for some reason)
 */
 
+
+
 #include <SPI.h>
 #include <EthernetLarge.h>
 #include <SSLClient.h>
@@ -30,6 +32,7 @@ TODO:
 #include "certificates.h"
 
 #include "helpers.h"
+#include "version.h"
 #include "secrets.h"
 #include "config.h"
 #include "on_board_led.h"
@@ -88,7 +91,7 @@ void setup() {
   Serial.begin(115200);
   Serial.println("\nSerial port connected.");
   Serial.print("Software version: v");
-  Serial.println(SOFTWARE_VERSION);
+  Serial.println(RELEASE_VERSION);
 
   Serial1.begin(115200);
   establishSerialConnectionWithNano();

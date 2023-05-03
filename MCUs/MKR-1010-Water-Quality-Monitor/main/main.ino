@@ -14,8 +14,15 @@
   The data is captured and relayed to my Central device (Nano 33 IoT board) via Bluetooth Low Energy (BLE).
 */
 
+///////////// Version Control //////////////
+#include "version.h"
+
+///////////// Configuration & Helper Files //////////////
 #include "config.h"
 #include "lcd_display.h" // file created to easily print messages to LCD
+
+///////////// Watchdog Timer Library //////////////
+#include <Adafruit_SleepyDog.h>
 
 ///////////// BLE Library //////////////
 #include <ArduinoBLE.h>
@@ -93,6 +100,8 @@ const unsigned long DATA_CAPTURE_INTERVAL = 500; // half second
 const unsigned long BLE_UPDATE_INTERVAL = 3000; // 3 seconds
 unsigned long lastDataCapture = 0;
 unsigned long lastBLEUpdate = 0;
+int watchdogTimeoutInterval = 8000; // 8 second timeout interval
+bool initialValue = true; // flag to not print out sensor values on LCD on first run
 
 float convertAnalogToVoltage(int analogValue) {
   return analogValue * ANALOG_TO_VOLTAGE;
@@ -141,17 +150,20 @@ void setup() {
   Serial.begin(115200);
   Serial.println("\nSerial port connected.");
   Serial.print("Software version: v");
-  Serial.println(SOFTWARE_VERSION);
+  Serial.println(RELEASE_VERSION);
 
   //////////// Setting up the LCD ////////////
   lcd.init(); // initialize the lcd
   lcd.backlight(); // turn on backlight
   lcd.createChar(0, degree); // create custom degree symbol
-  lcd.setCursor(3, 1); // set cursor to first column, second row
+  lcd.setCursor(3, 0); // set cursor to first column, second row
   lcd.blink(); // turn on blinking cursor
   lcdPrettyPrint("Booting up...", lcd); // helper function from lcd_display.h for readability
-  lcd.setCursor(2, 2);
-  lcdPrettyPrint("Software v" + String(SOFTWARE_VERSION), lcd, true, 2000);
+  lcd.setCursor(2, 1);
+  lcdPrettyPrint("Software v" + String(RELEASE_VERSION), lcd);
+
+  // Initialize the watchdog with an 8 second timeout
+  Watchdog.enable(watchdogTimeoutInterval);
 
   //////////// Setting up the sensors and pins ////////////
   // Ultrasonic and pH do not need pinMode setup. Pins are set up in the NewPing and Atlas pH libraries
@@ -163,7 +175,7 @@ void setup() {
   //////////// Setting up the Bluetooth service ////////////
   if (!BLE.begin()) {
     Serial.println("Starting BLE failed!");
-    lcd.setCursor(5, 1);
+    lcd.setCursor(5, 2);
     lcdPrettyPrint("BLE failed!", lcd); 
     while (1);
   }
@@ -182,14 +194,17 @@ void setup() {
 
   // Read sensor values to obtain initial values so not sending 0
   readSensorValues();
+  // set initalValue flag to false to print out future values to LCD
+  initialValue = false;
 
   BLE.advertise();
 
-  Serial.println("Peripheral device started!");
-  lcd.clear(); // clear the screen of initial values
-  lcd.setCursor(5, 1);
-  lcdPrettyPrint("BLE started!", lcd, true, 2000);
+  lcd.setCursor(1, 3);
+  lcdPrettyPrint("Boot up complete!", lcd, true, 2000); // clearing LCD after 2 seconds
   lcd.noBlink(); // Turn off blinking cursor before starting loop
+
+  // Kick the watchdog
+  Watchdog.reset();
 }
 
 void loop() {
@@ -226,10 +241,15 @@ void loop() {
           // Serial.println("BLE characteristics updated.");
         }
       }
+      // Kick the watchdog to reset the timer
+      Watchdog.reset();
     }
     Serial.print("Disconnected from central: ");
     Serial.println(central.address());
   }
+
+  // Kick the watchdog to reset the timer
+  Watchdog.reset();
 }
 
 float readTemperature() {
@@ -238,11 +258,13 @@ float readTemperature() {
   tempC = ds18b20.getTempCByIndex(0); // Update global tempC variable for TDS calculation
   float tempF = ds18b20.getTempFByIndex(0);
 
-  // update LCD
-  lcd.setCursor(0, 0);
-  lcd.print("Temp: ");
-  lcd.print(tempF, 1);
-  lcd.write(byte(0));
+  // update LCD if not sending initial values
+  if (!initialValue) {
+    lcd.setCursor(0, 0);
+    lcd.print("Temp: ");
+    lcd.print(tempF, 1);
+    lcd.write(byte(0));
+  }
 
   return tempF;
 }
@@ -254,14 +276,16 @@ int readTotalDissolvedSolids() {
   float tdsValue = (133.42 * pow(compensationVoltage, 3) - 255.86 * pow(compensationVoltage, 2) + 857.39 * compensationVoltage) * 0.5; 
   
   // update LCD
-  lcd.setCursor(0, 3);
-  lcd.print("TDS Value: ");
-  lcd.print(tdsValue, 0);
-  if (tdsValue < 1000) {
-    lcd.print(" ppm  ");
-  }
-  else {
-    lcd.print(" ppm ");
+  if (!initialValue) {
+    lcd.setCursor(0, 3);
+    lcd.print("TDS Value: ");
+    lcd.print(tdsValue, 0);
+    if (tdsValue < 1000) {
+      lcd.print(" ppm  ");
+    }
+    else {
+      lcd.print(" ppm ");
+    }
   }
 
   return round(tdsValue);
@@ -271,34 +295,43 @@ int readTurbidityValue() {
   // turbidity is the measure of cloudiness in the water. Range is 0 to 3000 NTU
   float turbidityVoltage = convertAnalogToVoltage(analogRead(TURBIDITY_SENSOR_PIN)) - turbidityOffset;
   
-  lcd.setCursor(0, 2);
-  lcd.print("Turb: ");
-  lcd.print(turbidityVoltage, 2);
-  lcd.print("V ");
+  // update LCD
+  if (!initialValue) {
+    lcd.setCursor(0, 2);
+    lcd.print("Turb: ");
+    lcd.print(turbidityVoltage, 2);
+    lcd.print("V ");
+  }
   // Convert the voltage to NTU (valid range is 2.5 to 4.21V)
   if (turbidityVoltage <= 2.5) {
-    lcd.print(3000);
-    lcd.print(" NTU"); 
+    if (!initialValue) {
+      lcd.print(3000);
+      lcd.print(" NTU"); 
+    }
     return 3000;
   }
   else if (turbidityVoltage > 4.21) {
-    lcd.print(0);
-    lcd.print(" NTU   "); // padding spcaes added to overwrite unused spaces from previous print
+    if (!initialValue) {
+      lcd.print(0);
+      lcd.print(" NTU   "); // padding spcaes added to overwrite unused spaces from previous print
+    }
     return 0;
   }
   else {
     // for 3.3V output this is the quadratic equation: y = -2572.2x² + 8700.5x - 4352.9
     //// source: https://forum.arduino.cc/t/getting-ntu-from-turbidity-sensor-on-3-3v/658067/14
     float ntuValue = round(-1120.4 * sq(turbidityVoltage) + 5742.3 * turbidityVoltage - 4352.9);
-    lcd.print(ntuValue);
-    if (ntuValue >= 1000) {
-      lcd.print(" NTU");
-    }
-    else if (ntuValue >= 100 || ntuValue < -9) {
-      lcd.print(" NTU ");
-    }
-    else {
-      lcd.print(" NTU  "); // padding spaces
+    if (!initialValue) {
+      lcd.print(ntuValue);
+      if (ntuValue >= 1000) {
+        lcd.print(" NTU");
+      }
+      else if (ntuValue >= 100 || ntuValue < -9) {
+        lcd.print(" NTU ");
+      }
+      else {
+        lcd.print(" NTU  "); // padding spaces
+      }
     }
     return ntuValue;
   }
@@ -313,14 +346,16 @@ float readWaterLevel() {
   float distance = sonar.ping_in();
 
   // Update LCD
-  lcd.setCursor(0, 1);
-  lcd.print("Pond Level: ");
-  if (distance <= MAX_DISTANCE) {
-    lcd.print(distance);
-    lcd.print(" in");
-  }
-  else {
-    lcd.print("N/A ");
+  if (!initialValue) {
+    lcd.setCursor(0, 1);
+    lcd.print("Pond Level: ");
+    if (distance <= MAX_DISTANCE) {
+      lcd.print(distance);
+      lcd.print(" in");
+    }
+    else {
+      lcd.print("N/A ");
+    }
   }
 
   return distance;
@@ -331,13 +366,15 @@ float readPH() {
   float pH_value = pH.read_ph();
 
   // Update LCD
-  lcd.setCursor(12, 0);
-  lcd.print("pH: ");
-  if (pH_value < 10.0) {
-    lcd.print(pH_value, 2);
-  }
-  else {
-    lcd.print(pH_value, 1);
+  if (!initialValue) {
+    lcd.setCursor(12, 0);
+    lcd.print("pH: ");
+    if (pH_value < 10.0) {
+      lcd.print(pH_value, 2);
+    }
+    else {
+      lcd.print(pH_value, 1);
+    }
   }
 
   return pH_value;

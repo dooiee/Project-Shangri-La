@@ -19,6 +19,7 @@
   - Integrate BLE capabilities to ESP32-RF-Controller board to ensure that if Firebase connection is not possible the ESP32 can still send out RF commands based on BLE service characteristics.
 */
 
+#include "version.h"
 #include "config.h"
 #include <ArduinoBLE.h>
 #include <ArduinoJson.h>
@@ -48,7 +49,7 @@ void setup() {
     Serial.begin(115200);
     Serial.println("\nSerial port connected.");
     Serial.print("Software version: v");
-    Serial.println(SOFTWARE_VERSION);
+    Serial.println(RELEASE_VERSION);
 
     pinMode(LED_BUILTIN, OUTPUT);
 
