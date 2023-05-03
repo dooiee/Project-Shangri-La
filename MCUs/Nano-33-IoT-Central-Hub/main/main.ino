@@ -10,9 +10,10 @@
     - The main board will be responsible for sending the data to my Firebase RTDB via Ethernet & REST APIs
 
   Potential Feature Additions:
+  - Add serial communication for logging purposes when peripheral is connected and disconnected.
+  - Add #ifdef statements to remove Serial communication when not needed.
   - Add remote configuration capabilities
   - Add remote firmware update capabilities (OTA)
-  - Add reset abilities (either via BLE, via MKR, or watchdog timer)
   - Not entirely necessary but could add Serial communication that is sent to MKR when the peripheral is connected.
     That would allow MKR to only make a server connection when necessary and remove unnecessary server reconnections when not receiving data.
   - Add variables to PondDataService that the MKR sensor collector board could use as configuration and update when a change is made.
@@ -113,6 +114,10 @@ void establishSerialConnectionWithMKR() {
         digitalWrite(LED_BUILTIN, HIGH);
         delay(50);
         digitalWrite(LED_BUILTIN, LOW);
+        delay(50);
+        digitalWrite(LED_BUILTIN, HIGH);
+        delay(50);
+        digitalWrite(LED_BUILTIN, LOW);
         break;
       }
     }
@@ -204,10 +209,10 @@ bool streamPeripheralData(BLEDevice peripheral) {
   Serial.println("Discovered peripheral attributes!");
 
   BLECharacteristic temperatureCharacteristic = peripheral.characteristic(temperatureCharacteristicUuid);
+  BLECharacteristic waterLevelCharacteristic = peripheral.characteristic(waterLevelCharacteristicUuid);
   BLECharacteristic totalDissolvedSolidsCharacteristic = peripheral.characteristic(totalDissolvedSolidsCharacteristicUuid);
   BLECharacteristic turbidityValueCharacteristic = peripheral.characteristic(turbidityValueCharacteristicUuid);
   BLECharacteristic turbidityVoltageCharacteristic = peripheral.characteristic(turbidityVoltageCharacteristicUuid);
-  BLECharacteristic waterLevelCharacteristic = peripheral.characteristic(waterLevelCharacteristicUuid);
   BLECharacteristic pHCharacteristic = peripheral.characteristic(pHCharacteristicUuid);
 
   if (!temperatureCharacteristic || !totalDissolvedSolidsCharacteristic || !turbidityValueCharacteristic || !turbidityVoltageCharacteristic || !waterLevelCharacteristic || !pHCharacteristic) {
@@ -228,7 +233,7 @@ bool streamPeripheralData(BLEDevice peripheral) {
     return false;
   }
 
-  BLECharacteristic* sensorCharacteristics[NUM_SENSORS] = {&temperatureCharacteristic, &totalDissolvedSolidsCharacteristic, &turbidityValueCharacteristic, &turbidityVoltageCharacteristic, &waterLevelCharacteristic, &pHCharacteristic};
+  BLECharacteristic* sensorCharacteristics[NUM_SENSORS] = {&temperatureCharacteristic, &waterLevelCharacteristic, &turbidityValueCharacteristic, &turbidityVoltageCharacteristic, &totalDissolvedSolidsCharacteristic, &pHCharacteristic};
 
   Serial.println("Reading data from peripheral...");
   while (peripheral.connected()) {
