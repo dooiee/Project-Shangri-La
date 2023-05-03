@@ -194,23 +194,23 @@ Let me name just a few of my failed efforts to paint an understanding of how har
     
     >(i.e. if it resets, how long does it typically take to get back online? Can I then improve that?)
     
-- [ ] Code cleanup
-  - [ ] Add more specific functions to better respond to the MCU situation 
+- [X] Code cleanup
+  - [X] Add more specific functions to better respond to the MCU situation 
   
     > (i.e. reconnect Wi-Fi if connection is lost rather than just reset for any problem)
     
-  - [ ] Improve response time to a remote action such as changing the underwater light color by programming microcontrollers much like a state machine
+  - [X] Improve response time to a remote action such as changing the underwater light color by programming microcontrollers much like a state machine
       
       > For instance, most times the action is taken within two seconds (because I have the MCU wait two seconds between each loop, but say I have it simply monitor a state and once that state is observed (like my phone displaying the remote control screen to change the lights), I could change the loop period that checks for a color signal to a fraction of a second time while I am interested in changing the color; thus improving controller response times by magnitudes.
   - [ ] Various small UI bug fixes
       
 - [ ] Be able to push OTA software updates to microcontrollers rather than having to physically remove the units from the box to modify 
-- [ ] Better protect depth sensor so that rain does not temporarily cause erroneous measurements 
+- [X] Better protect depth sensor so that rain does not temporarily cause erroneous measurements 
 
 ## Future Ideas & Developments
 - [ ] Autodose chemicals using peristaltic pumps
-- [ ] Add more sensors to better monitor water quality (dissolved oxygen levels, KH, and a better pH sensor)
-- [ ] Install an underwater camera that streams realtime video to the application to monitor fish health and observe any abnormalities
+- [X] Add more sensors to better monitor water quality (dissolved oxygen levels, KH, and a better pH sensor)
+- [X] Install an underwater camera that streams realtime video to the application to monitor fish health and observe any abnormalities
 - [ ] Electrically rig automated feeder to be able to control and feed remotely
 
 ## Acknowledgements
