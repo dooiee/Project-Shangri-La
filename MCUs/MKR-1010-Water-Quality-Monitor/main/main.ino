@@ -77,10 +77,10 @@ Gravity_pH pH = Gravity_pH(PH_SENSOR_PIN);
 // BLE configuartion
 BLEService sensorDataService(sensorDataServiceUuid); // Custom service for data transfer
 BLEFloatCharacteristic temperatureCharacteristic(temperatureCharacteristicUuid, BLERead | BLENotify);
-BLEFloatCharacteristic totalDissolvedSolidsCharacteristic(totalDissolvedSolidsCharacteristicUuid, BLERead | BLENotify);
+BLEFloatCharacteristic waterLevelCharacteristic(waterLevelCharacteristicUuid, BLERead | BLENotify);
 BLEIntCharacteristic turbidityValueCharacteristic(turbidityValueCharacteristicUuid, BLERead | BLENotify);
 BLEFloatCharacteristic turbidityVoltageCharacteristic(turbidityVoltageCharacteristicUuid, BLERead | BLENotify);
-BLEIntCharacteristic waterLevelCharacteristic(waterLevelCharacteristicUuid, BLERead | BLENotify);
+BLEIntCharacteristic totalDissolvedSolidsCharacteristic(totalDissolvedSolidsCharacteristicUuid, BLERead | BLENotify);
 BLEFloatCharacteristic pHCharacteristic(pHCharacteristicUuid, BLERead | BLENotify);
 
 // Global sensor array variables that will be used to average out values
