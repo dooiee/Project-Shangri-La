@@ -59,7 +59,7 @@ bool printWebData = true;  // set to false for better speed measurement
 // Setup for UDP NTP client & RTC
 unsigned int localPort = SECRET_LOCAL_PORT;
 
-const char timeServer[] = "time.nist.gov"; // time.nist.gov NTP server
+const char timeServer[] = "pool.ntp.org"; // pool of NTP servers to use
 const int NTP_PACKET_SIZE = 48; // NTP time stamp is in the first 48 bytes of the message
 byte packetBuffer[NTP_PACKET_SIZE]; //buffer to hold incoming and outgoing packets
 
@@ -238,8 +238,8 @@ void setRTCFromNTPServer() {
     // send an NTP packet to a time server
     sendNTPpacket(timeServer); 
 
-    // wait to see if a reply is available
-    delay(1000);
+    // wait to see if a reply is available (must be > 4 seconds to resist a denial of service)
+    delay(5000);
 
     if (Udp.parsePacket()) {
       Serial.println("Received NTP packet!");
@@ -279,11 +279,63 @@ void setRTCFromNTPServer() {
   }
 
   if (!packetReceived) {
-    Serial.println("No NTP packet received after maximum attempts.");
-    setOnBoardLEDColor(255, 0, 0, LED_INTENSITY_HIGH); // red
-    while (1); // do nothing, no point running without NTP packet
-    // possible future implementation will fetch server timestamp from Firebase 
+    Serial.println("No NTP packet received after maximum attempts. Fetching server timestamp from Firebase.");
+    setOnBoardLEDColor(255, 165, 0, LED_INTENSITY_HIGH); // orange
+
+    // Connect to the Firebase server
+    if (!connectToServer()) {
+      Serial.println("Connection to Firebase server failed.");
+      setOnBoardLEDColor(255, 0, 0, LED_INTENSITY_HIGH); // red
+      while (1); // halt execution if connection fails
+    }
+    
+    // Write a new entry to Firebase with the server's timestamp
+    StaticJsonDocument<256> jsonPayload;
+    jsonPayload["timestamp"][".sv"] = "timestamp";
+    sendJsonPatchRequest("/timestamp.json", jsonPayload);
+
+    // Read the timestamp back from Firebase
+    sendGetRequest("/timestamp.json", processFirebaseTimestampResponse);
   }
+}
+
+void processFirebaseTimestampResponse() {
+  // Wait for the server to respond
+  unsigned long timeout = millis();
+  while (client.available() == 0) {
+    if (millis() - timeout > 5000) {
+      Serial.println(">>> Client Timeout !");
+      client.stop();
+      return;
+    }
+  }
+
+  // Read all the lines of the reply from server
+  String response = "";
+  while (client.available()) {
+    response += client.readStringUntil('\n');
+  }
+
+  // Optional: Add a delay to ensure the request has completed
+  delay(100);
+
+  // Parse the response
+  StaticJsonDocument<200> doc;
+  DeserializationError error = deserializeJson(doc, response);
+
+  if (error) {
+    Serial.print(F("deserializeJson() failed: "));
+    Serial.println(error.c_str());
+    return;
+  }
+
+  // Get the timestamp
+  unsigned long timestamp = doc["timestamp"].as<unsigned long>();
+  // Convert the timestamp from milliseconds to seconds
+  unsigned long epoch = timestamp / 1000;
+
+  // Set the RTC
+  rtc.setEpoch(epoch);
 }
 
 bool connectToServer() {
@@ -545,6 +597,23 @@ void sendGetRequest(const char* path) {
 
   // process the response
   processServerResponse();
+}
+
+// Overloaded sendGetRequest function to handle and return the response to pass elsewhere
+void sendGetRequest(const char* path, void (*processResponse)()) {
+  client.print("GET ");
+  client.print(path);
+  // client.print("?auth=");
+  // client.print(firebaseAuth);
+  client.println(" HTTP/1.1");
+  client.println("User-Agent: SSLClientOverEthernet");
+  client.print("Host: ");
+  client.println(firebaseHost);
+  client.println("Connection: keep-alive");
+  client.println();
+
+  // process the response
+  processResponse();
 }
 
 void sendPutRequest(const char* path, const char* data) {
