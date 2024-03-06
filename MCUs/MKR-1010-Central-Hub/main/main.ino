@@ -23,7 +23,6 @@ TODO:
 */
 
 
-
 #include <SPI.h>
 #include <EthernetLarge.h>
 #include <SSLClient.h>
@@ -38,6 +37,9 @@ TODO:
 
 #include <ArduinoJson.h>
 
+// #Defines
+#define DEBUG (false) // Set to true to enable debug output for SSL
+
 // MKR 1010 ETH shield and board config
 byte mac[] = SECRET_ETH_SHIELD_MAC;
 IPAddress ip(SECRET_MKR_1010_IP);
@@ -50,7 +52,11 @@ const int rand_pin = A5;
 // Initialize the SSL client library
 // We input an EthernetClient, our trust anchors, and the analog pin
 EthernetClient base_client;
+#if DEBUG
+SSLClient client(base_client, TAs, (size_t)TAs_NUM, rand_pin, 1, SSLClient::SSL_INFO);
+#else
 SSLClient client(base_client, TAs, (size_t)TAs_NUM, rand_pin);
+#endif
 // Variables to measure the speed
 unsigned long beginMicros, endMicros;
 unsigned long byteCount = 0;
@@ -152,6 +158,16 @@ void establishSerialConnectionWithNano() {
   Serial.println("Establishing handshake with Nano 33 IoT...");
   // keep sending connection message to Nano until we receive a response
   while (true) {
+    // Check if debug command is received
+    if (Serial.available()) {
+      String command = Serial.readStringUntil('\n');
+      command.trim();
+      if (command == "DEBUG") {
+        Serial.println("Debug mode enabled, skipping connection with Nano.");
+        return;
+      }
+    }
+
     // if enough time has passed since the last attempt
     if (millis() - lastAttemptTime >= attemptInterval) {
       Serial.println("Sending READY_TO_CONNECT to Nano... ");
@@ -168,7 +184,7 @@ void establishSerialConnectionWithNano() {
       Serial.println("\tReceived: " + received); // Print any received message
       if (received == "NANO_CONNECTED") {
         Serial.println("Serial connection with Nano established!");
-        break;
+        return;
       }
     }
   }
@@ -268,7 +284,8 @@ void setRTCFromNTPServer() {
       // Set the RTC to the time from the NTP server
       rtc.setEpoch(epoch);
 
-      setOnBoardLEDColor(0, 255, 0, LED_INTENSITY_HIGH); // green
+      // Set the onboard LED to cyan to indicate success
+      setOnBoardLEDColor(0, 255, 255, LED_INTENSITY_HIGH); // cyan
     } 
     else {
       Serial.print("Attempt ");
@@ -362,26 +379,137 @@ bool connectToServer() {
   }
 }
 
+// bool connectToServer() {
+//   Serial.print("Connecting to ");
+//   Serial.println(firebaseHost);
+
+//   unsigned long retryDelay = 500; // Start with a half-second delay
+//   const unsigned long maxRetryDelay = 60000; // Maximum delay of 60 seconds
+//   bool isConnected = false;
+//   int attemptCount = 0;
+//   const int maxAttempts = 5; // Maximum number of connection attempts
+
+//   while (!isConnected && attemptCount < maxAttempts) {
+//     auto start = millis();
+//     // Attempt to connect
+//     if (client.connect(firebaseHost, 443)) {
+//       // If connection is successful
+//       auto time = millis() - start;
+//       Serial.print("Connected! Took: ");
+//       Serial.print(time);
+//       Serial.println("ms");
+//       setOnBoardLEDColor(0, 255, 0, LED_INTENSITY_HIGH); // Set LED to green
+//       isConnected = true; // Exit loop on successful connection
+//     } else {
+//       // If connection fails
+//       Serial.print("Connection failed. Attempt ");
+//       Serial.print(attemptCount + 1);
+//       Serial.println(" of 5.");
+//       setOnBoardLEDColor(255, 255, 0, LED_INTENSITY_HIGH); // Set LED to yellow to indicate retry
+
+//       delay(retryDelay); // Wait before retrying
+//       retryDelay *= 2; // Exponential backoff for the next retry attempt
+//       if (retryDelay > maxRetryDelay) {
+//         retryDelay = maxRetryDelay; // Cap the retry delay
+//       }
+//     }
+//     attemptCount++;
+//   }
+
+//   if (!isConnected) {
+//     // If unable to connect after all attempts
+//     Serial.println("Unable to connect after multiple attempts.");
+//     setOnBoardLEDColor(255, 0, 0, LED_INTENSITY_HIGH); // Set LED to red to indicate failure
+//     return false;
+//   }
+
+//   return true;
+// }
+
+
+// void reconnectToServer() {
+//   Serial.println("\nReconnecting to server...");
+//   // if you get a connection, report back via serial:
+//   auto start = millis();
+//   if (client.connect(firebaseHost, 443)) {
+//     // Handle connection success
+//     Serial.println("Reconnected to server!");
+//     auto time = millis() - start;
+//     Serial.print("Took: ");
+//     Serial.print(time);
+//     Serial.println("ms");
+//     // flicker onboard LED green 
+//     setOnBoardLEDColor(0, 255, 0, LED_INTENSITY_HIGH); // green
+//     delay(1000);
+//     setOnBoardLEDColor(0, 0, 0, LED_INTENSITY_HIGH); // off    
+//   } else {
+//     // Handle connection failure
+//     Serial.println("Reconnection failed.");
+//     setOnBoardLEDColor(255, 0, 0, LED_INTENSITY_HIGH); // red
+//     // Perform some error handling or retry logic
+//   }
+// }
+
 void reconnectToServer() {
   Serial.println("\nReconnecting to server...");
-  // if you get a connection, report back via serial:
-  auto start = millis();
-  if (client.connect(firebaseHost, 443)) {
-    // Handle connection success
-    Serial.println("Reconnected to server!");
-    auto time = millis() - start;
-    Serial.print("Took: ");
-    Serial.print(time);
-    Serial.println("ms");
-    // flicker onboard LED green 
-    setOnBoardLEDColor(0, 255, 0, LED_INTENSITY_HIGH); // green
-    delay(1000);
-    setOnBoardLEDColor(0, 0, 0, LED_INTENSITY_HIGH); // off    
-  } else {
-    // Handle connection failure
-    Serial.println("Reconnection failed.");
+
+  unsigned long retryDelay = 500; // Start with a half second delay
+  const unsigned long maxRetryDelay = 60000; // Maximum delay of 60 seconds
+  bool connected = false;
+  int attempt = 0;
+
+  while (!connected && attempt < 5) { // Limit the number of attempts
+    auto start = millis();
+    int result = client.connect(firebaseHost, 443);
+
+    if (result) {
+      // Handle connection success
+      auto time = millis() - start;
+      Serial.println("Reconnected to server!");
+      Serial.print("Took: ");
+      Serial.print(time);
+      Serial.println("ms");
+      // Flicker onboard LED green
+      setOnBoardLEDColor(0, 255, 0, LED_INTENSITY_HIGH); // green
+      delay(1000);
+      setOnBoardLEDColor(0, 255, 0, LED_INTENSITY_HIGH); // green
+      delay(1000);
+      setOnBoardLEDColor(0, 0, 0, LED_INTENSITY_HIGH); // off
+      connected = true;
+    } else {
+      // Handle connection failure
+      Serial.println("Reconnection failed. Attempting again...");
+      setOnBoardLEDColor(255, 0, 0, LED_INTENSITY_HIGH); // red
+
+      // Log the specific SSL error if possible
+      if (client.getWriteError() == SSLClient::SSL_CLIENT_CONNECT_FAIL) {
+        Serial.println("SSL Connection failed. Check internet connection and SSL settings.");
+      } else if (client.getWriteError() != 0) {
+        Serial.print("SSL Error Code: ");
+        Serial.println(client.getWriteError());
+      }
+
+      delay(retryDelay);
+      retryDelay *= 2; // Exponential backoff
+      if (retryDelay > maxRetryDelay) {
+        retryDelay = maxRetryDelay;
+      }
+    }
+    attempt++;
+  }
+
+  if (!connected) {
+    Serial.println("Failed to reconnect after multiple attempts.");
     setOnBoardLEDColor(255, 0, 0, LED_INTENSITY_HIGH); // red
-    // Perform some error handling or retry logic
+    delay(500);
+    setOnBoardLEDColor(255, 0, 0, LED_INTENSITY_HIGH); // red
+    delay(500);
+    setOnBoardLEDColor(255, 0, 0, LED_INTENSITY_HIGH); // red
+    delay(5000);
+    setOnBoardLEDColor(0, 0, 0, LED_INTENSITY_HIGH); // off
+
+    // Perform a system reset
+    NVIC_SystemReset();
   }
 }
 
