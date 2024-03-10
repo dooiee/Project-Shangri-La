@@ -1,3 +1,6 @@
 [submodule "firmware"]
 	path = firmware
 	url = https://github.com/dooiee/firmware.git
+[submodule "ios-app"]
+	path = ios-app
+	url = https://github.com/dooiee/ios-app.git
