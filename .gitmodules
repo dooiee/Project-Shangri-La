@@ -4,3 +4,6 @@
 [submodule "ios-app"]
 	path = ios-app
 	url = https://github.com/dooiee/ios-app.git
+[submodule "pi-server"]
+	path = pi-server
+	url = https://github.com/dooiee/piPondServer.git
