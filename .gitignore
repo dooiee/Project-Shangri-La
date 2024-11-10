@@ -9,3 +9,6 @@
 
 # any secrets.h files
 **/secrets.h
+
+# Firebase service account key
+**/serviceAccountKey.json
