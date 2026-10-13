@@ -1,6 +1,6 @@
 # Project Shangri-La ⛩️
 
-<img align="right" width="200" src="https://github.com/dooiee/Project-Shangri-La/blob/main/images/Koi_Vinyl_Rescaled.png?raw=true" alt="Project Shangri-La koi artwork">
+<img align="right" width="200" src="https://github.com/dooiee/Project-Shangri-La/blob/main/other-stuff/images/Koi_Vinyl_Rescaled.png?raw=true" alt="Project Shangri-La koi artwork">
 
 **An IoT-powered koi pond restoration and automation project.**
 
@@ -69,9 +69,9 @@ The app includes dedicated screens for water parameters, historical data, camera
 
 ## Pond Restoration
 
-![Pond restoration progress](https://github.com/dooiee/Project-Shangri-La/blob/main/Progress_Gifs/PanoramicStartToFinishProgress.gif)
+![Pond restoration progress](https://github.com/dooiee/Project-Shangri-La/blob/main/other-stuff/Progress_Gifs/PanoramicStartToFinishProgress.gif)
 
-<img width="350" src="https://user-images.githubusercontent.com/71622811/189450978-d58cb060-40e7-4df5-82ea-f9e1a42e2083.jpeg?raw=true" alt="Pond restoration photo 1"> <img width="350" src="https://user-images.githubusercontent.com/71622811/189451202-2cd09bf6-2cb2-45cf-a671-2420ec180cc4.jpeg?raw=true" alt="Pond restoration photo 2">
+<img width="350" src="https://user-images.githubusercontent.com/71622811/189450978-d58cb060-40e7-4df5-82b9-8dfa9a4d45da.jpeg?raw=true" alt="Pond restoration photo 1"> <img width="350" src="https://user-images.githubusercontent.com/71622811/189451202-2cd09bf6-2cb2-45cf-a671-2420ec180cc4.jpeg?raw=true" alt="Pond restoration photo 2">
 
 <img width="300" src="https://user-images.githubusercontent.com/71622811/189453065-c1d580b3-102f-4a6d-b2d3-4b2a9d2108db.jpeg?raw=true" alt="Pond restoration photo 3"> <img width="300" src="https://user-images.githubusercontent.com/71622811/189451401-fcc9abcf-1d32-4a45-908f-519bcdb88be5.jpeg?raw=true" alt="Pond restoration photo 4">
 
