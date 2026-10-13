@@ -55,11 +55,11 @@ The system evolved over time. The repository includes original microcontroller i
 
 ## Demos
 
-<video src="https://user-images.githubusercontent.com/71622811/188991797-72c4ba37-2b89-409f-95e6-2039481f20bc.mp4" controls width="600"></video>
+https://github.com/user-attachments/assets/d72d2102-7e98-4763-9069-997c07223636
 
-<video src="https://user-images.githubusercontent.com/71622811/189450137-4b5813f1-78b0-4a68-a956-98fa43d12203.mp4" controls width="600"></video>
+https://github.com/user-attachments/assets/770dc247-68db-449b-9d5f-381850d66db0
 
-<video src="https://user-images.githubusercontent.com/71622811/189450438-dd4cd04f-8a0b-4f7f-9acf-b6fe17a12255.mp4" controls width="600"></video>
+https://github.com/user-attachments/assets/c51fa0fe-5228-4910-8fc6-a3d73f2f6bd8
 
 ## iOS Application
 
